@@ -168,6 +168,7 @@ class AdPredictor(BOPR, base.BinaryClassifier):
             weight.mean += mean_delta
             weight.variance *= variance_multiplier
             self.weights[i] = weight
+        return self
 
     def predict_proba_one(self, x):
         total_mean, total_variance = self._active_mean_variance(x)
