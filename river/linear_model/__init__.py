@@ -6,6 +6,7 @@ from .log_reg import LogisticRegression
 from .pa import PAClassifier, PARegressor
 from .perceptron import Perceptron
 from .softmax import SoftmaxRegression
+from .ad_predictor import NormalPrior
 
 __all__ = [
     "base",
