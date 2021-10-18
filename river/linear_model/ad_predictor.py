@@ -1,9 +1,10 @@
-from typing import Union, NamedTuple
-from scipy import stats
-
 import collections
 import numbers
+from typing import NamedTuple, Union
+
 import base
+import utils
+from scipy import stats
 
 
 class NormalPrior(NamedTuple):
@@ -105,7 +106,7 @@ class AdPredictor(base.Classifier):
         self.beta = prior.beta
         self.prior_probability = prior.prior_probability
         self.weights = collections.defaultdict(prior)
-    
+
     def _total_mean_variance(self, x):
         """Total mean and variance of the gaussian beliefs over the actives weights for a given instance.
 
@@ -122,6 +123,23 @@ class AdPredictor(base.Classifier):
         means = [self.weights[i].mean * xi for i, xi in x.items()]
         variances = [self.weights[i].variance * xi for i, xi in x.items()]
         return sum(means), sum(variances) + self.beta ** 2
+
+    def _step_size(self, t):
+        """Learning step size functions.
+
+        Parameters
+        ----------
+        t : float
+
+        Returns
+        -------
+        tuple of float
+            Evaluation of the step size functions at the clipped total mean to total standard deviation ratio.
+        """
+        t = utils.math.clamp(t, minimum=-self.surprise, maximum=self.surprise)
+        v = stats.norm.pdf(t) / stats.norm.cdf(t)
+        w = v * (v + t)
+        return (v, w)
 
     @staticmethod
     def _target_encoding(y):
