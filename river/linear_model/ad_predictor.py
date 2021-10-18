@@ -106,6 +106,23 @@ class AdPredictor(base.Classifier):
         self.prior_probability = prior.prior_probability
         self.weights = collections.defaultdict(prior)
     
+    def _total_mean_variance(self, x):
+        """Total mean and variance of the gaussian beliefs over the actives weights for a given instance.
+
+        Parameters
+        ----------
+        x : dict
+           1-in-N encoded features of the instance.
+
+        Returns
+        -------
+        tuple of float
+            Total mean and variance of the gaussian beliefs over the actives weights.
+        """
+        means = [self.weights[i].mean * xi for i, xi in x.items()]
+        variances = [self.weights[i].variance * xi for i, xi in x.items()]
+        return sum(means), sum(variances) + self.beta ** 2
+
     @staticmethod
     def _target_encoding(y):
         assert isinstance(y, numbers.Number)
