@@ -1,13 +1,14 @@
 import collections
 import numbers
-from typing import NamedTuple, Union
+from dataclasses import dataclass, field
+from typing import Union
 
-import base
-import utils
+from river import base, utils
 from scipy import stats
 
 
-class NormalPrior(NamedTuple):
+@dataclass
+class NormalPrior:
     """Normal Prior over model weight.
 
     The Normal Prior represents a gaussian belief over a weight i.e. weight follow normal distribution with parameters μ ``mean`` and σ2 ``variance``.
@@ -18,20 +19,17 @@ class NormalPrior(NamedTuple):
         Scale of the inverse link function (standard normal cumulative distribution function).
     n_features
         Number of features.
+    mean
+        Mean of the gaussian belief over the weight.
     prior_probability
         Prior probability on the feature weights.
-
-    Attributes
-    ----------
-    variance : float
-                Variance of the gaussian belief over the weight.
 
     Examples
     --------
 
     >>> from river import datasets
     >>> from river import linear_model
-
+    
     >>> X_y = datasets.Phishing()
 
     >>> prior = linear_model.ad_predictor.NormalPrior(beta=0.05, n_features=X_y.n_features, prior_probability=0.6)
@@ -44,15 +42,12 @@ class NormalPrior(NamedTuple):
     beta: float
     n_features: int
     variance: float = 1.0
+    mean: float = field(init=False)
     prior_probability: Union[float, None] = None
 
-    @property
-    def mean(self):
-        """
-        mean : float
-            Mean of the gaussian belief over the weight.
-        """
-        return (
+
+    def __post_init__(self):
+        self.mean = (
             0
             if self.prior_probability is None
             else stats.norm.ppf(self.prior_probability)
