@@ -2,6 +2,7 @@ from typing import Union, NamedTuple
 from scipy import stats
 
 import collections
+import numbers
 import base
 
 
@@ -104,6 +105,11 @@ class AdPredictor(base.Classifier):
         self.beta = prior.beta
         self.prior_probability = prior.prior_probability
         self.weights = collections.defaultdict(prior)
+    
+    @staticmethod
+    def _target_encoding(y):
+        assert isinstance(y, numbers.Number)
+        return 1.0 if y == 1 else -1.0
 
     def learn_one(self, x, y):
         pass
