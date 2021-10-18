@@ -8,10 +8,10 @@ from scipy import stats
 
 
 @dataclass
-class NormalPrior:
-    """Normal Prior over model weight.
+class GaussianBelief:
+    """Gaussian Belief over model weight.
 
-    The Normal Prior represents a gaussian belief over a weight i.e. weight follow normal distribution with parameters μ ``mean`` and σ2 ``variance``.
+    Represents a gaussian belief over a weight i.e. weight follow normal distribution with parameters μ ``mean`` and σ2 ``variance``.
 
     Parameters
     ----------
@@ -29,10 +29,10 @@ class NormalPrior:
 
     >>> from river import datasets
     >>> from river import linear_model
-    
+
     >>> X_y = datasets.Phishing()
 
-    >>> prior = linear_model.ad_predictor.NormalPrior(beta=0.05, n_features=X_y.n_features, prior_probability=0.6)
+    >>> prior = linear_model.ad_predictor.GaussianBelief(beta=0.05, n_features=X_y.n_features, prior_probability=0.6)
 
     >>> print(prior)
     Biased normal prior on a weight 𝒩(μ=2.281, σ2=1.000)
@@ -94,7 +94,7 @@ class AdPredictor(base.Classifier):
 
     """
 
-    def __init__(self, prior: NormalPrior, surprise: float, epsilon: float):
+    def __init__(self, prior: GaussianBelief, surprise: float, epsilon: float):
         self.prior = prior
         self.surprise = surprise
         self.epsilon = epsilon
@@ -135,6 +135,7 @@ class AdPredictor(base.Classifier):
         v = stats.norm.pdf(t) / stats.norm.cdf(t)
         w = v * (v + t)
         return (v, w)
+
 
     @staticmethod
     def _target_encoding(y):
