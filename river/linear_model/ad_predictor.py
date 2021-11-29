@@ -6,6 +6,8 @@ from typing import Union
 from river import base, utils
 from scipy import stats
 
+import numpy as np
+
 
 @dataclass
 class GaussianBelief:
@@ -178,7 +180,23 @@ class AdPredictor(base.Classifier):
         return 1.0 if y == 1 else -1.0
 
     def learn_one(self, x, y):
-        pass
+        y = self._target_encoding(y)
+        total_mean, total_variance = self._total_mean_variance(x)
+        v, w = self._step_size(y*total_mean/total_variance)
+
+        for i, xi in x.items():
+
+            weight = self.weights[i]
+
+            weight.mean +=  y * weight.variance / np.sqrt(total_variance) * v
+            weight.variance *= 1.0 - weight.variance / total_variance * w
+
+            adjusted_weight = self._apply_dynamic_corrections(weight)
+
+            self.weight[i] = adjusted_weight
+
+        return self
+
 
     def predict_proba_one(self, x):
         pass
