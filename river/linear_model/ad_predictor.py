@@ -3,10 +3,10 @@ import numbers
 from dataclasses import dataclass, field
 from typing import Union
 
-from river import base, utils
+import numpy as np
 from scipy import stats
 
-import numpy as np
+from river import base, utils
 
 
 @dataclass
@@ -84,7 +84,7 @@ class AdPredictor(base.Classifier):
 
     Notes
     -----
-    In (1) the application is focused on discrete multi-valued features where the model is fitted on 1-in-N encoding of the features. 
+    In (1) the application is focused on discrete multi-valued features where the model is fitted on 1-in-N encoding of the features.
     Using preprocessing is advised.
 
     References
@@ -140,12 +140,12 @@ class AdPredictor(base.Classifier):
     def _apply_dynamic_corrections(self, weight):
         """Dynamic corrections of the mean and variance of the gaussian belief over a weight.
 
-        Update gaussian belief over a weight to converge back to the prior in the limit of zero data and infinite time.   
+        Update gaussian belief over a weight to converge back to the prior in the limit of zero data and infinite time.
 
         Parameters
         ----------
-        weight 
-            Gaussian belief over the weight. 
+        weight
+            Gaussian belief over the weight.
 
         Returns
         -------
@@ -182,13 +182,13 @@ class AdPredictor(base.Classifier):
     def learn_one(self, x, y):
         y = self._target_encoding(y)
         total_mean, total_variance = self._total_mean_variance(x)
-        v, w = self._step_size(y*total_mean/total_variance)
+        v, w = self._step_size(y * total_mean / total_variance)
 
         for i, xi in x.items():
 
             weight = self.weights[i]
 
-            weight.mean +=  y * weight.variance / np.sqrt(total_variance) * v
+            weight.mean += y * weight.variance / np.sqrt(total_variance) * v
             weight.variance *= 1.0 - weight.variance / total_variance * w
 
             adjusted_weight = self._apply_dynamic_corrections(weight)
@@ -197,10 +197,8 @@ class AdPredictor(base.Classifier):
 
         return self
 
-
     def predict_proba_one(self, x):
-        
+
         total_mean, total_variance = self._active_mean_variance(x)
         p = stats.norm.cdf(total_mean / total_variance)
-        return {False: 1. - p, True: p}
-
+        return {False: 1.0 - p, True: p}
