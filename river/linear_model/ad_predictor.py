@@ -199,4 +199,8 @@ class AdPredictor(base.Classifier):
 
 
     def predict_proba_one(self, x):
-        pass
+        
+        total_mean, total_variance = self._active_mean_variance(x)
+        p = stats.norm.cdf(total_mean / total_variance)
+        return {False: 1. - p, True: p}
+
