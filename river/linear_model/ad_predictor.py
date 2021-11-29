@@ -45,7 +45,6 @@ class GaussianBelief:
     mean: float = field(init=False)
     prior_probability: Union[float, None] = None
 
-
     def __post_init__(self):
         self.mean = (
             0
@@ -136,6 +135,42 @@ class AdPredictor(base.Classifier):
         w = v * (v + t)
         return (v, w)
 
+    def _apply_dynamic_corrections(self, weight):
+        """Dynamic corrections of the mean and variance of the gaussian belief over a weight.
+
+        Update gaussian belief over a weight to converge back to the prior in the limit of zero data and infinite time.   
+
+        Parameters
+        ----------
+        weight 
+            Gaussian belief over the weight. 
+
+        Returns
+        -------
+        GaussianBelief
+            Mean and variance adjusted gaussian belief.
+        """
+
+        posterior = GaussianBelief(
+            beta=self.prior.beta, n_features=self.prior.n_features
+        )
+
+        adjusted_variance = (
+            weight.variance
+            * self.prior.variance
+            / (
+                (1.0 - self.epsilon) * self.prior.variance
+                + self.epsilon * weight.variance
+            )
+        )
+        adjusted_mean = adjusted_variance * (
+            (1.0 - self.epsilon) * weight.mean / weight.variance
+            + self.epsilon * self.prior.mean / self.prior.variance
+        )
+
+        posterior.mean, posterior.variance = adjusted_mean, adjusted_variance
+
+        return posterior
 
     @staticmethod
     def _target_encoding(y):
