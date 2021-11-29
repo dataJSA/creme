@@ -1,12 +1,12 @@
 """Linear models."""
 from . import base
+from .ad_predictor import AdPredictor
 from .alma import ALMAClassifier
 from .lin_reg import LinearRegression
 from .log_reg import LogisticRegression
 from .pa import PAClassifier, PARegressor
 from .perceptron import Perceptron
 from .softmax import SoftmaxRegression
-from .ad_predictor import NormalPrior
 
 __all__ = [
     "base",
@@ -17,4 +17,5 @@ __all__ = [
     "PARegressor",
     "Perceptron",
     "SoftmaxRegression",
+    "AdPredictor",
 ]
