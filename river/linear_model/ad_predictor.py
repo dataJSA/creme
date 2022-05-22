@@ -52,7 +52,7 @@ class GaussianBelief:
             0
             if self.prior_probability is None
             else stats.norm.ppf(self.prior_probability)
-            * (self.beta ** 2 + self.n_features)
+            * (self.beta**2 + self.n_features)
         )
 
     def __repr__(self) -> str:
@@ -118,7 +118,7 @@ class AdPredictor(base.Classifier):
         """
         means = [self.weights[i].mean * xi for i, xi in x.items()]
         variances = [self.weights[i].variance * xi for i, xi in x.items()]
-        return sum(means), sum(variances) + self.beta ** 2
+        return sum(means), sum(variances) + self.beta**2
 
     def _step_size(self, t):
         """Learning step size functions.
@@ -152,7 +152,6 @@ class AdPredictor(base.Classifier):
         GaussianBelief
             Mean and variance adjusted gaussian belief.
         """
-
         posterior = GaussianBelief(
             beta=self.prior.beta, n_features=self.prior.n_features
         )
@@ -180,7 +179,9 @@ class AdPredictor(base.Classifier):
         return 1.0 if y == 1 else -1.0
 
     def learn_one(self, x, y):
+
         y = self._target_encoding(y)
+
         total_mean, total_variance = self._total_mean_variance(x)
         v, w = self._step_size(y * total_mean / total_variance)
 
@@ -199,6 +200,7 @@ class AdPredictor(base.Classifier):
 
     def predict_proba_one(self, x):
 
-        total_mean, total_variance = self._active_mean_variance(x)
+        total_mean, total_variance = self._total_mean_variance(x)
         p = stats.norm.cdf(total_mean / total_variance)
+
         return {False: 1.0 - p, True: p}
